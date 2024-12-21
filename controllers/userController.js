@@ -3,7 +3,7 @@ var jwt = require("jsonwebtoken");
 
 const db = require("../database");
 
-const saltRounds = process.env.BCRYPT_SALT;
+const saltRounds = parseInt(process.env.BCRYPT_SALT, 10);
 const jwtSecret = process.env.JWT_SECRET;
 const Users = db.user;
 
@@ -68,8 +68,14 @@ const registerUserPhone = async (req, res) => {
           .status(200)
           .send({ message: "registered Successfully", isSuccess: true });
       });
+    } else {
+      res
+        .status(409)
+        .send({
+          isSuccess: false,
+          message: "The phone number is already registered",
+        });
     }
-    return res.status(409).send({isSuccess:false,message:"The phone number is already registered"})
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });
