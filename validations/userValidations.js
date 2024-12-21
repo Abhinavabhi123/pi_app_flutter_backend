@@ -51,8 +51,30 @@ const registerPhoneValidate = [
     .withMessage("Password must be at least 6 characters long."),
 ];
 
+const registerEmailValidate = [
+  body("name")
+    .notEmpty()
+    .withMessage("Name is required")
+    .bail()
+    .isString()
+    .withMessage("Name field only contain string values"),
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email address"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .bail()
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long."),
+];
+
 module.exports = {
   handleValidationErrors,
   loginPhoneValidator,
   registerPhoneValidate,
+  registerEmailValidate,
 };

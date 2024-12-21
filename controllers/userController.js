@@ -9,41 +9,44 @@ const Users = db.user;
 
 const authenticate_user = async (req, res) => {
   try {
-    const { phone, password } = req.body;
-    await Users.findOne({ where: { phone } })
-      .then(async (response) => {
-        const comparedPass = await bcrypt.compare(
-          password,
-          response.dataValues?.password
+    const { phone, password } = req.headers;
+
+    const userData = await Users.findOne({ where: { phone } });
+    console.log(userData);
+
+    if (userData) {
+      const comparedPass = await bcrypt.compare(
+        password,
+        userData.dataValues?.password
+      );
+      if (comparedPass) {
+        const token = jwt.sign(
+          {
+            id: userData.dataValues?.id,
+            phone: userData.dataValues?.phone,
+          },
+          jwtSecret,
+          {
+            expiresIn: "1d",
+          }
         );
-        if (comparedPass) {
-          const token = jwt.sign(
-            {
-              id: response.dataValues?.id,
-              phone: response.dataValues?.phone,
-            },
-            jwtSecret,
-            {
-              expiresIn: "1d",
-            }
-          );
-          return res.status(200).send({
-            isSuccess: true,
-            message: "Authentication Successful",
-            token: token,
-          });
-        }
+        return res.status(200).send({
+          isSuccess: true,
+          message: "Authentication Successful",
+          token: token,
+        });
+      } else {
         return res
           .status(404)
           .send({ isSuccess: false, message: "Incorrect password" });
-      })
-      .catch(() => {
-        console.log("no data found");
-        return res.status(404).send({
-          isSuccess: false,
-          message: "This phone number is not registered!",
-        });
+      }
+    } else {
+      console.log("no data found");
+      return res.status(404).send({
+        isSuccess: false,
+        message: "This phone number is not registered!",
       });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });
@@ -63,18 +66,16 @@ const registerUserPhone = async (req, res) => {
         password: hashedPassword,
         name,
       }).then(() => {
-        console.log("success");
+        console.log("User registered successfully with phone number");
         return res
           .status(200)
-          .send({ message: "registered Successfully", isSuccess: true });
+          .send({ message: "Registered Successfully", isSuccess: true });
       });
     } else {
-      res
-        .status(409)
-        .send({
-          isSuccess: false,
-          message: "The phone number is already registered",
-        });
+      res.status(409).send({
+        isSuccess: false,
+        message: "The phone number is already registered",
+      });
     }
   } catch (error) {
     console.error(error);
@@ -82,8 +83,30 @@ const registerUserPhone = async (req, res) => {
   }
 };
 
-const registerUserEmail = () => {
+const registerUserEmail = async (req, res) => {
   try {
+    const { email, password, name } = req.body;
+    console.log(req.body);
+    const userData = await Users.findOne({ where: { email } });
+    if (!userData) {
+      const hashedPassword = await bcrypt.hash(String(password), saltRounds);
+
+      await Users.create({
+        name,
+        email,
+        password: hashedPassword,
+      }).then(() => {
+        console.log("User registered successfully with email");
+        return res
+          .status(200)
+          .send({ isSuccess: true, message: "Registered successfully" });
+      });
+    } else {
+      res.status(409).send({
+        isSuccess: false,
+        message: "The email address is already registered",
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });

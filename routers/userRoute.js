@@ -10,20 +10,26 @@ const {
   loginPhoneValidator,
   handleValidationErrors,
   registerPhoneValidate,
+  registerEmailValidate,
 } = require("../validations/userValidations");
 
-router.get(
-  "/auth_user_phone",
-  loginPhoneValidator,
-  handleValidationErrors,
-  authenticate_user
-);
 router.post(
   "/register_user_phone",
   registerPhoneValidate,
   handleValidationErrors,
   registerUserPhone
 );
-router.post("/register_user_email", registerUserEmail);
+router.post(
+  "/register_user_email",
+  registerEmailValidate,
+  handleValidationErrors,
+  registerUserEmail
+);
+router.get(
+  "/auth_user_phone",
+  loginPhoneValidator,
+  handleValidationErrors,
+  authenticate_user
+);
 
 module.exports = router;
