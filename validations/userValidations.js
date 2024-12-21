@@ -10,23 +10,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// * Validation code for authentication with phone number
-const loginPhoneValidator = [
-  header("phone")
-    .notEmpty()
-    .withMessage("Phone number is required")
-    .bail()
-    .isNumeric()
-    .withMessage("Phone number must be numeric")
-    .isLength({ min: 10, max: 10 })
-    .withMessage("Phone number must have 10 digits."),
-  header("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .bail()
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long."),
-];
 
 //*user sign up with phone validation
 const registerPhoneValidate = [
@@ -51,6 +34,7 @@ const registerPhoneValidate = [
     .withMessage("Password must be at least 6 characters long."),
 ];
 
+// *user sign up with email validation
 const registerEmailValidate = [
   body("name")
     .notEmpty()
@@ -72,9 +56,44 @@ const registerEmailValidate = [
     .withMessage("Password must be at least 6 characters long."),
 ];
 
+// * Validation code for authentication with phone number
+const loginPhoneValidate = [
+  header("phone")
+    .notEmpty()
+    .withMessage("Phone number is required")
+    .bail()
+    .isNumeric()
+    .withMessage("Phone number must be numeric")
+    .isLength({ min: 10, max: 10 })
+    .withMessage("Phone number must have 10 digits."),
+  header("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .bail()
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long."),
+];
+
+// *validation code for authentication with email
+const loginEmailValidate=[
+  header("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email address"),
+  header("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .bail()
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long."),
+]
+
 module.exports = {
   handleValidationErrors,
-  loginPhoneValidator,
   registerPhoneValidate,
   registerEmailValidate,
+  loginPhoneValidate,
+  loginEmailValidate
 };

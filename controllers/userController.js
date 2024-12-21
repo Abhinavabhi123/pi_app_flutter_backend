@@ -7,52 +7,6 @@ const saltRounds = parseInt(process.env.BCRYPT_SALT, 10);
 const jwtSecret = process.env.JWT_SECRET;
 const Users = db.user;
 
-const authenticate_user = async (req, res) => {
-  try {
-    const { phone, password } = req.headers;
-
-    const userData = await Users.findOne({ where: { phone } });
-    console.log(userData);
-
-    if (userData) {
-      const comparedPass = await bcrypt.compare(
-        password,
-        userData.dataValues?.password
-      );
-      if (comparedPass) {
-        const token = jwt.sign(
-          {
-            id: userData.dataValues?.id,
-            phone: userData.dataValues?.phone,
-          },
-          jwtSecret,
-          {
-            expiresIn: "1d",
-          }
-        );
-        return res.status(200).send({
-          isSuccess: true,
-          message: "Authentication Successful",
-          token: token,
-        });
-      } else {
-        return res
-          .status(404)
-          .send({ isSuccess: false, message: "Incorrect password" });
-      }
-    } else {
-      console.log("no data found");
-      return res.status(404).send({
-        isSuccess: false,
-        message: "This phone number is not registered!",
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Internal server error" });
-  }
-};
-
 const registerUserPhone = async (req, res) => {
   try {
     const { phone, password, name } = req.body;
@@ -113,8 +67,98 @@ const registerUserEmail = async (req, res) => {
   }
 };
 
+// *user Authentication with phone number
+const authenticate_user_phone = async (req, res) => {
+  try {
+    const { phone, password } = req.headers;
+
+    const userData = await Users.findOne({ where: { phone } });
+    console.log(userData);
+
+    if (userData) {
+      const comparedPass = await bcrypt.compare(
+        password,
+        userData.dataValues?.password
+      );
+      if (comparedPass) {
+        const token = jwt.sign(
+          {
+            id: userData.dataValues?.id,
+            phone: userData.dataValues?.phone,
+          },
+          jwtSecret,
+          {
+            expiresIn: "1d",
+          }
+        );
+        return res.status(200).send({
+          isSuccess: true,
+          message: "Authentication Successful",
+          token: token,
+        });
+      } else {
+        return res
+          .status(404)
+          .send({ isSuccess: false, message: "Incorrect password" });
+      }
+    } else {
+      console.log("no data found");
+      return res.status(404).send({
+        isSuccess: false,
+        message: "This phone number is not registered!",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
+// * User Authentication with email
+const authenticate_user_email = async (req, res) => {
+  try {
+    const { email, password } = req.headers;
+    const userData = await Users.findOne({ where: {email} });
+    if (userData) {
+      const comparePass = await bcrypt.compare(
+        password,
+        userData?.dataValues?.password
+      );
+      if (comparePass) {
+        const token = jwt.sign(
+          {
+            id: userData.dataValues?.id,
+            phone: userData.dataValues?.phone,
+          },
+          jwtSecret,
+          {
+            expiresIn: "1d",
+          }
+        );
+        return res.status(200).send({
+          isSuccess: true,
+          message: "Authentication Successful",
+          token: token,
+        });
+      } else {
+        return res
+          .status(404)
+          .send({ isSuccess: false, message: "Incorrect password" });
+      }
+    } else {
+      return res
+        .status(404)
+        .send({ isSuccess: false, message: "This email is not registered" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
-  authenticate_user,
   registerUserPhone,
   registerUserEmail,
+  authenticate_user_phone,
+  authenticate_user_email,
 };

@@ -2,15 +2,17 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  authenticate_user,
   registerUserPhone,
   registerUserEmail,
+  authenticate_user_phone,
+  authenticate_user_email,
 } = require("../controllers/userController");
 const {
-  loginPhoneValidator,
+  loginPhoneValidate,
   handleValidationErrors,
   registerPhoneValidate,
   registerEmailValidate,
+  loginEmailValidate
 } = require("../validations/userValidations");
 
 router.post(
@@ -27,9 +29,10 @@ router.post(
 );
 router.get(
   "/auth_user_phone",
-  loginPhoneValidator,
+  loginPhoneValidate,
   handleValidationErrors,
-  authenticate_user
+  authenticate_user_phone
 );
+router.get("/auth_user_email",loginEmailValidate,handleValidationErrors,authenticate_user_email)
 
 module.exports = router;
