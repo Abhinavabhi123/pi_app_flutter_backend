@@ -1,9 +1,15 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
 const morgan = require("morgan");
+const helmet = require("helmet");
+
+require("dotenv").config();
 
 const app = express();
+
+// Use Helmet for basic security headers
+app.use(helmet());
+
 const Port = process.env.PORT || 3000;
 const db = require("./database");
 

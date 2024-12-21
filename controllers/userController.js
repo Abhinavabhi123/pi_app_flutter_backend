@@ -3,7 +3,7 @@ var jwt = require("jsonwebtoken");
 
 const db = require("../database");
 
-const saltRounds = parseInt(process.env.BCRYPT_SALT, 10);;
+const saltRounds = process.env.BCRYPT_SALT;
 const jwtSecret = process.env.JWT_SECRET;
 const Users = db.user;
 
@@ -50,24 +50,42 @@ const authenticate_user = async (req, res) => {
   }
 };
 
-const registerUser = async (req, res) => {
+const registerUserPhone = async (req, res) => {
+  try {
+    const { phone, password, name } = req.body;
 
-  const { phone, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  if (hashedPassword) {
-    await Users.create({
-      phone,
-      password: hashedPassword,
-    }).then(() => {
-      console.log("success");
-      return res
-        .status(200)
-        .send({ message: "registered Successfully", isSuccess: true });
-    });
+    const userData = await Users.findOne({ where: { phone } });
+
+    if (!userData) {
+      const hashedPassword = await bcrypt.hash(String(password), saltRounds);
+      await Users.create({
+        phone,
+        password: hashedPassword,
+        name,
+      }).then(() => {
+        console.log("success");
+        return res
+          .status(200)
+          .send({ message: "registered Successfully", isSuccess: true });
+      });
+    }
+    return res.status(409).send({isSuccess:false,message:"The phone number is already registered"})
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
+const registerUserEmail = () => {
+  try {
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
   }
 };
 
 module.exports = {
   authenticate_user,
-  registerUser,
+  registerUserPhone,
+  registerUserEmail,
 };
