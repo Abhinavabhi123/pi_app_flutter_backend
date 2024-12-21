@@ -3,7 +3,7 @@ var jwt = require("jsonwebtoken");
 
 const db = require("../database");
 
-const saltRounds = process.env.BCRYPT_SALT;
+const saltRounds = parseInt(process.env.BCRYPT_SALT, 10);;
 const jwtSecret = process.env.JWT_SECRET;
 const Users = db.user;
 
@@ -51,19 +51,21 @@ const authenticate_user = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
+
   const { phone, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
-  await Users.create({
-    phone,
-    password: hashedPassword,
-  }).then(() => {
-    console.log("success");
-    return res
-      .status(200)
-      .send({ message: "registered Successfully", isSuccess: true });
-  });
+  if (hashedPassword) {
+    await Users.create({
+      phone,
+      password: hashedPassword,
+    }).then(() => {
+      console.log("success");
+      return res
+        .status(200)
+        .send({ message: "registered Successfully", isSuccess: true });
+    });
+  }
 };
-
 
 module.exports = {
   authenticate_user,
